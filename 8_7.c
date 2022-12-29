@@ -2,9 +2,9 @@
 #include <stdlib.h>
 
 
-typedef struct Node {
+typedef struct Node_s {
+  struct Node_s *prev, *next;
   double value;
-  struct Node *prev, *next;
 } Node;
 //создаёт пустой список
 //возвращает указатель на value в голове списка (вспом. узел)
@@ -18,9 +18,10 @@ double *initList(){
 //полностью освобождает память списка
 //принимает указатель на value голове списка (вспом. узел)
 void freeList(double *head){
-  Node *tmp, *save;
-  tmp = (Node*)head;
-  while(tmp->next != (Node*)head){
+  Node *tmp, *save, *golova;
+  tmp = (Node*)((long long)head - sizeof(Node*) * 2);
+  golova = tmp;
+  while(tmp->next != golova){
     save = tmp;
     tmp = tmp->next;
     free(save);
@@ -31,44 +32,44 @@ void freeList(double *head){
 //определяет следующий элемент после заданного
 //(для вспом. узла возвращает первый элемент)
 double *getNext(double* curr){
-  Node *tmp = (Node*)curr;
+  Node *tmp = (Node*)((long long)curr - sizeof(Node*) * 2);
   return (&tmp->next->value);
 }
 
 //определяет предыдущий элемент перед заданным
 //(для вспом. узла возвращает последний элемент)
 double *getPrev(double* curr){
-  Node *tmp = (Node*)curr;
+  Node *tmp = (Node*)((long long)curr - sizeof(Node*) * 2);
   return (&tmp->prev->value);
 }
 
 //создаёт и вставляет узел со значением newval сразу после узла where
 double *addAfter(double* where, double newval){
-  Node *tmp = (Node*)where;
+  Node *tmp = (Node*)((long long)where - sizeof(Node*) * 2);
   Node *new = (Node*)malloc(sizeof(Node));
   new->value = newval;
   new->prev = tmp;
   new->next = tmp->next;
   tmp->next->prev = new;
   tmp->next = new;
-  return ((double*)new);
+  return (&new->value);
 }
 
 //создаёт и вставляет узел со значением newval сразу перед узлом where
 double *addBefore(double* where, double newval){
-  Node *tmp = (Node*)where;
+  Node *tmp = (Node*)((long long)where - sizeof(Node*) * 2);
   Node *new = (Node*)malloc(sizeof(Node));
   new->value = newval;
   new->next = tmp;
   new->prev = tmp->prev;
   tmp->prev->next = new;
   tmp->prev = new;
-  return ((double*)new);
+  return (&new->value);
 }
 
 //удаляет и освобождает заданный узел
 void erase(double* what){
-  Node *tmp = (Node*)what;
+  Node *tmp = (Node*)((long long)what - 2 * sizeof(Node*));
   tmp->prev->next = tmp->next;
   tmp->next->prev = tmp->prev;
   printf("%0.3lf\n", tmp->value);
@@ -76,8 +77,7 @@ void erase(double* what){
 }
 
 void printList(Node* head){
-  Node *tmp;
-  tmp = head;
+  Node *tmp = head;
   while(tmp->next != head){
     tmp = tmp->next;
     printf("%0.3lf\n", tmp->value);
@@ -112,7 +112,7 @@ int main(){
       }
     }
     printf("===\n");
-    printList((Node*)list);
+    printList((Node*)((long long)list - 2 * sizeof(Node*)));
     printf("===\n");
     freeList(list);
     count = 1;

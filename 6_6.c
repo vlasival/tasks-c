@@ -45,8 +45,10 @@ void tokensSplit(Tokens *tokens, const char *str, const char *delims){
   }
 }
 
-//delete all the resources in tokens
 void tokensFree(Tokens *tokens){
+  for(int i = 0; i < tokens->num; i++){
+    free(tokens->arr[i]);
+  }
   if(tokens->arr != NULL){
     free(tokens->arr);
   }
